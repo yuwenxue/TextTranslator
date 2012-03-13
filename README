@@ -1,0 +1,113 @@
+General idea of the assignment:
+
+I often have need to perform some simple translations on text--for example, copying text from a PowerPoint slide and getting rid of all the vertical tab characters. If I need to modify text in this way just once in a while, I can do it manually in a text editor; but if I have to do it frequently, I want a tool that does it for me. This assignment is to create just such a tool.
+
+This program has been designed to make it extremely easy to add new kinds of translations.
+
+Since I want everyone to have some experience creating and working with GUIs, this is an individual assignment (not a team assignment).
+Details:
+
+screenshot of GUI Create a GUI that looks like this picture. Your GUI should be resizable.
+
+The menu items under the File menu should be:
+
+Load...
+    Uses a JFileChooser to request a text file from the user, and displays the contents of this file in the upper text area.
+Save As...
+    Uses a JFileChooser to ask the user where to save the file, then saves the contents of the lower text area in this location.
+Quit
+    Terminates the program. (Closing the window should also terminate the program.)
+
+Put these menu items under the Translate menu:
+
+Identity
+    Makes no changes to the input. This sounds useless, but in fact it is useful for debugging the GUI, and it also provides a template that you can use the next time you want to add a translator. (I have about 20 translators I've written at various times.) 
+Detab
+    Replaces tabs at the beginning of each line. Each tab is replaced by four spaces. Tabs within the line (that is, after the first non-tab character) are not replaced.
+Entab
+    Replaces each group of four spaces at the beginning of each line with a tab character. For example, if a line begins with ten spaces, the first eight spaces are replaced by two tabs, and the remaining two spaces are unaffected.
+Single space
+    Replaces consecutive pairs of newlines with a single newline. For example, six consecutive newlines would be changed into three newlines; seven consecutive newlines would be changed into four newlines.
+Double space
+    Replaces each newline in the input with two newlines
+Wrap Text
+    Wraps lines so that no line is longer than 72 characters. Long lines should be broken at a space character, with the remainder put on a new line with the same indentation as the original. Very long lines will result in several shorter lines. If a line contains more than 72 consecutive non-space characters (as often happens with a URL), the long "word" is not broken, but is put on a line by itself. This method does not join lines, it only wraps long lines. 
+Flow Text
+    Flows text (the way web pages do). Consecutive nonblank lines should be joined (with a space in between), then wrapped to 72 characters, as in Wrap Text above. Blank lines separate paragraphs, and paragraphs are never joined. (Note: A "blank line" is any line that is visibly blank; it may contain spaces or tabs, which should be removed.) 
+Fix Indentation
+    Given a Java (or Java-like) program, indent it according to the following rules:
+
+        For each opening brace, {, indent the next line by 4 spaces. (If two open braces, indent the next line by 8, etc.)
+        For each closing brace, }, indent this line by 4 fewer spaces than the previous line; but don't indent less than zero.
+        If a line contains an opening brace and a later closing brace, {...}, they cancel each other out. However, if a closing brace comes before an opening brace, }...{, they do not cancel each other out; both have the effects described above. (Multiple braces? First do all the cancellations you can, then apply the indentation rules according to whatever is left.)
+
+Both the upper and the lower text areas should be fully editable. When the user clicks the Translate button, the specified translation is applied to the text in the upper area, and the result replaces any previous text in the lower area. The program never changes any text in the upper area.
+
+As a convenience, whenever a translation type is chosen from the Translate menu, the new translation should be automatically applied; the user should not have to explicitly click the Translate button. (I use this program a lot, and trust me, this really is a convenience.)
+Only a single translation is performed at any time, and the text in the lower text area is replaced by a translation of the text in the upper text area. If you want to perform two consecutive translations, you would have to do the first translation, then copy the result from the lower text area, paste it into the upper text area, then do the second translation.
+Programming details:
+class TextTranslator extends JFrame (the “main” class)
+The addTranslator method
+
+The main class should have a void addTranslator(TranslatorInterface translator) method to do everything necessary to install the various translators. When setting up the GUI, addTranslator should be called once for each of the eight translators. Here's what the addTranslator method should do:
+
+    Get the name of the translator, create a menu item with that name, and add the menu item to the Translate menu. (This is called during GUI creation; you do not have to
+    Get a new TranslateListener for this particular translator (by calling new TranslateListener(translator)), and tell the menu item you just created to add this as an ActionListener.
+        TranslateListener should be an inner class of TextTranslator.
+
+Adding a translator
+
+For each translator you add to the program:
+
+    Create a new class, appropriately named, that implements TranslatorInterface, and
+    Add a call to addTranslator in your GUI building method (for example, addTranslator(new TextToPowerpoint());).
+
+If you have to do more than this, you are doing it wrong.
+class TranslateListener implements ActionListener
+
+Here's what the actionPerformed method of the TranslateListener should do:
+
+    Selects the translator.
+    Gets the name of the selected translator, and puts it in the title bar.
+    Gets the description of the selected translator, and puts it just under the title bar.
+    Gets the text from the upper text area, uses the selected translator to translate it, and puts the result in the lower text area.
+
+interface TranslatorInterface
+
+Create an interface TranslatorInterface that declares the following methods:
+
+String getName();
+    Returns the string to be used as a menu item and as the title of the GUI window..
+String getDescription();
+    Returns a description of what this translator does.
+String translate(String text);
+    Translates the input to the output. Note that the input is a single string, probably containing newlines, that represents the entire input, and the output is the same. Often this is more convenient. If it is easier for some methods to work with an array of lines, this can be done with
+         String[] inputLines = text.split("\n");
+
+Every translation class will implement this interface.
+Structure of the assignment
+
+    Project name: TextTranslator
+    Package name: textTranslator
+    Class names and method signatures:
+        class TextTranslator extends JFrame
+            public static void main(String[] args)
+            private void addTranslator(TranslatorInterface translator)
+            Other methods as appropriate to create the GUI
+            class TranslateListener implements ActionListener
+                public TranslateListener(TranslatorInterface translator) // constructor
+                public void actionPerformed(ActionEvent arg0)
+        interface TranslatorInterface
+            String getName();
+            String getDescription();
+            String translate(String text);
+        class IdentityTranslator implements TranslatorInterface
+        class DetabTranslator implements TranslatorInterface
+        class EntabTranslator implements TranslatorInterface
+        class SingleSpaceTranslator implements TranslatorInterface
+        class DoubleSpaceTranslator implements TranslatorInterface
+        class WrapTextTranslator implements TranslatorInterface
+        class FlowTextTranslator implements TranslatorInterface
+        class FixIndentationTranslator implements TranslatorInterface
+    Provide JUnit tests for the translate method for all classes that implement TranslatorInterface (yes, even including the identity translator!). No other methods need be JUnit tested.
+    Provide Javadoc documentation for all classes and methods, except JUnit tests.
